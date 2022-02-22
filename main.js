@@ -1,17 +1,17 @@
-const { Menu, MenuItem, ipcMain } = require('electron');
+// const { Menu, MenuItem, ipcMain } = require('electron');
 const electron = require('electron');
 const path = require('path');
 const url = require('url');
 
-const UCD = require(path.join(__dirname, 'lib', 'ucd.js'))
-const ucdWorker = require(path.join(__dirname, 'lib', 'ucd_worker.js'))
+const UCD = require(path.join(__dirname, 'lib', 'ucd.js'));
+const ucdWorker = require(path.join(__dirname, 'lib', 'ucd_worker.js'));
 
 const app = electron.app;
 const BrowserWindow = electron.BrowserWindow;
 
 let mainWindow;
 
-async function createWindow () {
+async function createWindow() {
   mainWindow = new BrowserWindow({
     width: 400,
     height: 600, 
@@ -26,14 +26,17 @@ async function createWindow () {
     }
   });
 
-  mainWindow.loadURL(url.format({
-    pathname: path.join(__dirname, 'index.html'),
-    protocol: 'file:',
-    slashes: true
-  }));
+  // mainWindow.loadURL(url.format({
+  //   pathname: path.join(__dirname, 'index.html'),
+  //   protocol: 'file:',
+  //   slashes: true
+  // }));
+  mainWindow.loadURL(`file://${path.join(__dirname, 'index.html')}`);
+  //   slashes: true
+  // }));
 
-  mainWindow.on('closed', function () {
-    mainWindow = null
+  mainWindow.on('closed', () => {
+    mainWindow = null;
   });
 
 //  const menu = Menu.buildFromTemplate([
@@ -58,19 +61,19 @@ async function createWindow () {
 }
 
 app.whenReady()
-   .then(createWindow)
-   .then(async () => {
-     mainWindow.webContents.send("requestStatus", {});
-   });
+  .then(createWindow)
+  .then(async () => {
+    mainWindow.webContents.send("requestStatus", {});
+  });
 
-app.on('window-all-closed', function () {
-  if (process.platform !== 'darwin') {
-    app.quit();
-  }
-})
+app.on('window-all-closed', () => {
+    if (process.platform !== 'darwin') {
+      app.quit();
+    }
+  });
 
-app.on('activate', function () {
-  if (mainWindow === null) {
-    createWindow();
-  }
-});
+app.on('activate', () => {
+    if (mainWindow === null) {
+      createWindow();
+    }
+  });
