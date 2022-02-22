@@ -1,0 +1,50 @@
+{
+  "name": "unicode-widget",
+  "version": "0.1.10",
+  "description": "Unicode Widget",
+  "main": "main.js",
+  "type": "commonjs",
+  "scripts": {
+    "start": "electron ."
+  },
+  "repository": "https://github.com/kyungminlee/unicode-widget",
+  "keywords": [
+    "unicode"
+  ],
+  "author": "Kyungmin Lee",
+  "license": "CC0-1.0",
+  "devDependencies": {
+    "electron": "^16.0.0",
+    "electron-builder": "^22.13.1"
+  },
+  "dependencies": {
+    "fuzzaldrin-plus": "^0.6.0"
+  },
+  "build": {
+    "appId": "com.unicode-widget.app",
+    "win": {
+      "icon": "assets/win/icon.ico",
+      "target": [
+        "nsis",
+        "portable"
+      ]
+    },
+    "linux": {
+      "icon": "assets/png",
+      "target": [
+        "AppImage",
+        "tar.xz"
+      ]
+    },
+    "mac": {
+      "icon": "assets/mac/icon.icns",
+      "target": [
+        "default"
+      ],
+      "hardenedRuntime": true
+    }
+  },
+  "files": [
+    "ucd.nounihan.simplified.json"
+  ]
+}
