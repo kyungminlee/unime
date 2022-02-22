@@ -10,7 +10,6 @@ const ucdController = {
     const queryElement = document.getElementById('query');
     const statusbarElement = document.getElementById('statusbar');
     const {ready, message} = data;
-    // viewController.clear()
     if (ready) {
       ucdController.ready = true;
       queryElement.removeAttribute('disabled');
@@ -30,8 +29,7 @@ const ucdController = {
     queryElement.removeAttribute('disabled');
     viewController.update(result);
   },
-}
-
+};
 
 const viewController = {
   clear: () => {
@@ -62,8 +60,6 @@ const viewController = {
     cell2.innerHTML = na;
     row.onclick = () => {
       ucdController.sendToClipboard(ch);
-      // const statusbarElement = document.getElementById('statusbar')
-      // statusbarElement.innerHTML = `Character ${ch} copied to clipboard.`
     }
   }, // addRow
 
@@ -105,7 +101,7 @@ const viewController = {
     }
     return false;
   }, // searchHandler
-} // viewController
+}; // viewController
 
 onload = () => {
   const queryElement = document.getElementById("query");
@@ -113,7 +109,7 @@ onload = () => {
     if (e.key == "Enter") { viewController.searchHandler(); }
   };
   queryElement.focus();
-}
+};
 
 onkeydown = (event) => {
   const queryElement = document.getElementById("query");
@@ -126,12 +122,12 @@ onkeydown = (event) => {
 window.api.send("requestStatus", {});
 
 window.api.receive("status", (data) => {
-  const {ready, message} = data;
-  console.log(`Got message ${message}`);
-  ucdController.receiveStatus(data);
-})
+    const {ready, message} = data;
+    console.log(`Got message ${message}`);
+    ucdController.receiveStatus(data);
+  });
 
 window.api.receive("searchResult", (data) => {
-  console.log(`Got searchResult ${data}`);
-  ucdController.receiveSearchResult(data);
-})
+    console.log(`Got searchResult ${data}`);
+    ucdController.receiveSearchResult(data);
+  });

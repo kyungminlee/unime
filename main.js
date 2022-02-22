@@ -1,4 +1,4 @@
-// const { Menu, MenuItem, ipcMain } = require('electron');
+const { Menu, MenuItem, ipcMain } = require('electron');
 const electron = require('electron');
 const path = require('path');
 const url = require('url');
@@ -26,39 +26,32 @@ async function createWindow() {
     }
   });
 
-  // mainWindow.loadURL(url.format({
-  //   pathname: path.join(__dirname, 'index.html'),
-  //   protocol: 'file:',
-  //   slashes: true
-  // }));
   mainWindow.loadURL(`file://${path.join(__dirname, 'index.html')}`);
-  //   slashes: true
-  // }));
 
   mainWindow.on('closed', () => {
     mainWindow = null;
   });
 
-//  const menu = Menu.buildFromTemplate([
-//    {
-//      label: 'File',
-//      submenu: [
-//        {
-//          label: 'Always On Top',
-//          click(menuItem, browserWindow, event) { 
-//            mainWindow.setAlwaysOnTop(menuItem.checked);
-//          },
-//          type: "checkbox",
-//          checked: true
-//        },
-//        {
-//          role: "quit"
-//        }
-//      ]
-//    }
-//  ])
-//  Menu.setApplicationMenu(menu);
-}
+  const menu = Menu.buildFromTemplate([
+    {
+      label: 'File',
+      submenu: [
+        {
+          label: 'Always On Top',
+          click(menuItem, _browserWindow, _event) { 
+            mainWindow.setAlwaysOnTop(menuItem.checked);
+          },
+          type: "checkbox",
+          checked: true
+        },
+        {
+          role: "quit"
+        }
+      ]
+    }
+  ]);
+  Menu.setApplicationMenu(menu);
+};
 
 app.whenReady()
   .then(createWindow)
