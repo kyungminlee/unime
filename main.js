@@ -1,7 +1,6 @@
 const { Menu, MenuItem, ipcMain } = require('electron');
 const electron = require('electron');
 const path = require('path');
-const url = require('url');
 
 const UCD = require(path.join(__dirname, 'lib', 'ucd.js'));
 const ucdWorker = require(path.join(__dirname, 'lib', 'ucd_worker.js'));
@@ -51,7 +50,7 @@ async function createWindow() {
     }
   ]);
   Menu.setApplicationMenu(menu);
-};
+}
 
 app.whenReady()
   .then(createWindow)
