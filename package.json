@@ -14,11 +14,10 @@
   "author": "Kyungmin Lee",
   "license": "CC0-1.0",
   "devDependencies": {
-    "electron": "^16.0.0",
-    "electron-builder": "^22.13.1"
+    "electron": "^19.0.0"
   },
   "dependencies": {
-    "fuzzaldrin-plus": "^0.6.0"
+    "fuzzy-search": "^3.2.1"
   },
   "build": {
     "appId": "com.unicode-widget.app",
