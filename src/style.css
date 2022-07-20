@@ -30,7 +30,7 @@ input#query::placeholder {
 }
 #history {
   height: 40px;
-  overflow: scroll;
+  overflow: hidden;
   background-color: #373737;
   margin: 2px;
 }
