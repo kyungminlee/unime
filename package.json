@@ -1,83 +1,45 @@
 {
-  "name": "unicode-widget",
-  "version": "0.1.11",
-  "description": "Unicode Widget",
+  "name": "unime",
+  "version": "0.1.0",
+  "description": "Unicode Input",
   "main": "src/main.js",
   "type": "commonjs",
   "scripts": {
-    "start": "electron-forge start",
-    "package": "electron-forge package",
-    "make": "electron-forge make",
-    "publish": "electron-forge publish",
+    "start": "electron .",
+    "app:dir": "electron-builder --dir",
+    "app:dist": "electron-builder",
     "lint": "echo \"No linting configured\""
   },
-  "repository": "https://github.com/kyungminlee/unicode-widget",
+  "repository": "https://github.com/kyungminlee/unime",
   "keywords": [
     "unicode"
   ],
   "author": "Kyungmin Lee",
   "license": "CC0-1.0",
-  "config": {
-    "forge": {
-      "packagerConfig": {
-        "icon": "assets/icons/mac/icon.icns"
-      },
-      "makers": [
-        {
-          "name": "@electron-forge/maker-squirrel",
-          "config": {
-            "name": "unicode_widget",
-            "iconUrl":  "assets/icons/win/icon.ico",
-            "setupIcon":  "assets/icons/win/icon.ico"
-          }
-        },
-        {
-          "name": "@electron-forge/maker-zip",
-          "platforms": [
-            "darwin"
-          ]
-        },
-        {
-          "name": "@electron-forge/maker-deb",
-          "config": {}
-        },
-        {
-          "name": "@electron-forge/maker-rpm",
-          "config": {}
-        }
-      ]
-    }
-  },
   "devDependencies": {
-    "@electron-forge/cli": "^6.0.0-beta.64",
-    "@electron-forge/maker-deb": "^6.0.0-beta.64",
-    "@electron-forge/maker-rpm": "^6.0.0-beta.64",
-    "@electron-forge/maker-squirrel": "^6.0.0-beta.64",
-    "@electron-forge/maker-zip": "^6.0.0-beta.64",
-    "electron": "^19.0.0"
+    "electron": "^19.0.0",
+    "electron-builder": "^23.3.1"
   },
   "dependencies": {
-    "electron-squirrel-startup": "^1.0.0",
-    "fuzzy-search": "^3.2.1"
+    "fuzzy-search": "^3.2.1",
+    "lru-cache": "^7.13.1"
   },
   "build": {
-    "appId": "com.unicode-widget.app",
+    "appId": "com.unime.app",
     "win": {
-      "icon": "assets/win/icon.ico",
       "target": [
         "nsis",
         "portable"
       ]
     },
     "linux": {
-      "icon": "assets/png",
       "target": [
         "AppImage",
         "tar.xz"
       ]
     },
     "mac": {
-      "icon": "assets/mac/icon.icns",
+      "category": "public.app-category.utilities",
       "target": [
         "default"
       ],
@@ -85,6 +47,7 @@
     }
   },
   "files": [
-    "ucd.nounihan.simplified.json"
+    "src/ucd.nounihan.simplified.json",
+    "fonts/unifont-14.0.04.otf"
   ]
 }
