@@ -1,6 +1,6 @@
 const fs = require('fs');
 const FuzzySearch = require('fuzzy-search');
-const path = require('path');
+const LRU = require('lru-cache');
 
 class UnicodeDatabase {
   constructor(ucdFilename) {
@@ -30,15 +30,15 @@ class UnicodeDatabase {
 }
 
 class CachedUnicodeDatabase {
-  constructor(ucdFilename, configFilename, cacheFilename, cacheSize=10000, maxHits=2000) {
-    this.cache = {};
-    this.history = [];
+  constructor(ucdFilename, configFilename, aliasCacheFilename, cacheFilename, cacheSize=10000, maxHits=2000) {
+    this.cache = new LRU({max: cacheSize});
     this.cacheSize = cacheSize;
     this.maxHits = maxHits;
     this.aliases = {};
     this.ucd = new UnicodeDatabase(ucdFilename);
     this.loadConfig(configFilename);
-    this.loadCache(cacheFilename);
+    this.loadCache(aliasCacheFilename, {append: false});
+    this.loadCache(cacheFilename, {append: true});
   }
 
   loadConfig(filename) {
@@ -48,20 +48,27 @@ class CachedUnicodeDatabase {
     // TODO: other configs (unicode categories, number of ...)
   }
 
-  loadCache(filename) {
+  loadCache(filename, options) {
+    const {append} = options;
+    this.history = [];
     try {
       const data = JSON.parse(fs.readFileSync(filename, "utf8"));
-      if (data && data['cache'] && data['history']) {
-        this.cache = data['cache'];
-        this.history = data['history'];
+      if (data) {
+        if (append) {
+          for (const item of data) {
+            this.cache.set(item[0], item[1].value);
+          }
+        } else {
+          this.cache.load(data);
+        }
+        // console.log(`loaded ${filename}`)
       }
     } catch (err) {
-      // console.log(`Error in loadCache: ${err}`);
     }
   }
 
   dump(filename) {
-    const cache = JSON.stringify({cache: this.cache, history: this.history});
+    const cache = JSON.stringify(this.cache.dump());
     fs.writeFile(filename, cache, (err) => { if (err) throw err; });
   }
 
@@ -71,12 +78,7 @@ class CachedUnicodeDatabase {
 
   searchRaw(query) {
     const hits = this.ucd.search(query, this.maxHits);
-    this.cache[query] = hits.map((obj) => obj.cp); // Keep only codepoints in cache
-    this.history.push(query);
-    while (this.history.length > this.cacheSize) {
-      const query = this.history.shift();
-      delete this.cache[query];
-    }
+    this.cache.set(query, hits.map((obj) => obj.cp)); // Keep only codepoints in cache
     return hits;
   }
 
@@ -105,17 +107,17 @@ class CachedUnicodeDatabase {
     query = aliasResolved || query.toUpperCase();
 
     // Third, check if result is cached
-    const cacheHits = this.cache[query];
+    const cacheHits = this.cache.get(query);
     if (cacheHits) {
       const hits = cacheHits.map((cp) => ({cp: parseInt(cp), na: this.ucd.lookup(cp)}));
       return hits;
     }
-
+    // console.log(`cache miss: ${query}`)
     return this.searchRaw(query);
   }
 
   clearCache() {
-    this.cache = {};
+    this.cache.clear();
   }
 
   cacheAliases() {

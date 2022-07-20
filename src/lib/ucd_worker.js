@@ -3,15 +3,15 @@ const UCD = require(path.join(__dirname, 'ucd.js'));
 const { ipcMain, clipboard } = require('electron');
 
 class UCDWorker {
-  constructor(dataFile, configFile, cacheFile) {
+  constructor(dataFile, configFile, aliasCacheFile, cacheFile) {
     this.dataFile = dataFile;
     this.configFile = configFile;
+    this.aliasCacheFile = aliasCacheFile;
     this.cacheFile = cacheFile;
-
     this.status = {ready: false, message: 'Initializing...'};
-    this.cachedUCD = new UCD.CachedUnicodeDatabase(dataFile, configFile, cacheFile);
+    this.cachedUCD = new UCD.CachedUnicodeDatabase(dataFile, configFile, aliasCacheFile, cacheFile);
 
-    ipcMain.on("query", (event, args) => {
+    ipcMain.on("search", (event, args) => {
       try {
         const { query } = args;
         const result = this.cachedUCD.search(query);
@@ -56,10 +56,41 @@ class UCDWorker {
       this.cachedUCD.dump(this.cacheFile);
       this.status = {ready: true, message: 'Ready.'};
       event.reply('status', this.status);
-      console.log( `Caching finished`);
+      // console.log( `Caching finished`);
     });
 
     this.status = {ready: true, message: 'Ready.'};
+  }
+
+  async rebuildCache(event, args) {
+    this.status = {ready: false, message: 'Caching...'};
+    event.reply("status", this.status);
+
+    if (args.force) {
+      this.cachedUCD.clearCache();
+    }
+
+    const totalCount = Object.keys(this.cachedUCD.aliases).length;
+    let count = 0;
+    const blockSize = Math.max(Math.floor(totalCount / 100), 1);
+    let targetCount = Math.min(blockSize, totalCount);
+    for(const alias in this.cachedUCD.aliases) {
+      this.cachedUCD.search(alias);
+      ++count;
+      if (count >= targetCount) {
+        this.status = {ready: false, message: `Cached ${count}/${totalCount} items.`}
+        event.reply('status', this.status);
+        targetCount = Math.min(targetCount + blockSize, totalCount);
+      }
+    }
+    this.cachedUCD.dump(this.cacheFile);
+    this.status = {ready: true, message: 'Ready.'};
+    event.reply('status', this.status);
+    // console.log( `Caching finished`);
+  }
+
+  dumpCache() {
+    this.cachedUCD.dump(this.cacheFile);
   }
   
   getStatus() {

@@ -2,7 +2,7 @@ const ucdController = {
   ready: false,
   sendQuery: (query) => {
     // console.log(`Sending query ${query}`)
-    window.api.send('query', query);
+    window.api.send('search', query);
   },
   sendToClipboard: (item) => {
     // console.log(`sendToClipboard ${item}`)

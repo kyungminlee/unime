@@ -3,6 +3,11 @@ const electron = require('electron');
 const path = require('path');
 
 const { UCDWorker } = require(path.join(__dirname, 'lib', 'ucd_worker.js'));
+// const {
+//   Worker, isMainThread, parentPort, workerData
+// } = require('node:worker_threads');
+
+// const { Worker } = require('worker_threads')
 
 const app = electron.app;
 const BrowserWindow = electron.BrowserWindow;
@@ -67,12 +72,14 @@ app.whenReady()
     ucdWorker = new UCDWorker(
       path.join(__dirname, 'ucd.nounihan.simplified.json'),
       path.join(__dirname, 'config.json'),
+      path.join(__dirname, 'aliasCache.json'),
       path.join(app.getPath('userData'), 'cache.json')
     );
   })
 
 app.on('window-all-closed', () => {
     if (process.platform !== 'darwin') {
+      ucdWorker.dumpCache();;
       app.quit();
     }
   });
@@ -82,3 +89,7 @@ app.on('activate', () => {
       createWindow();
     }
   });
+
+// const { fork } = require('child_process');
+// const ps = fork(path.join(__dirname, 'lib', 'ucdServer.js'));
+// console.log('userData', app.getPath('userData'))
