@@ -14,7 +14,7 @@ async function createWindow() {
   mainWindow = new BrowserWindow({
     width: 400,
     height: 600, 
-    alwaysOnTop: false, 
+    alwaysOnTop: true, 
     frame: true,
     icon: path.join(__dirname, 'assets', 'icons', 'png', '64x64.png'),
     webPreferences: {
@@ -45,11 +45,19 @@ async function createWindow() {
           checked: true
         },
         {
+          label: 'Rebuild Cache',
+          click(_menuItem, browserWindow, _event) {
+            mainWindow.webContents.send('cache', {force: true});
+          },
+          type: 'normal'
+        },
+        {
           role: "quit"
         }
       ]
     }
   ]);
+
   Menu.setApplicationMenu(menu);
 }
 
@@ -61,10 +69,6 @@ app.whenReady()
       path.join(__dirname, 'config.json'),
       path.join(app.getPath('userData'), 'cache.json')
     );
-  })
-  .then(async () => {
-    mainWindow.webContents.send('cache', {});
-    mainWindow.webContents.send('requestStatus', {});
   })
 
 app.on('window-all-closed', () => {
