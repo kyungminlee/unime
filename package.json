@@ -1,6 +1,6 @@
 {
   "name": "unicode-widget",
-  "version": "0.1.10",
+  "version": "0.1.11",
   "description": "Unicode Widget",
   "main": "src/main.js",
   "type": "commonjs",
@@ -19,12 +19,16 @@
   "license": "CC0-1.0",
   "config": {
     "forge": {
-      "packagerConfig": {},
+      "packagerConfig": {
+        "icon": "assets/icons/mac/icon.icns"
+      },
       "makers": [
         {
           "name": "@electron-forge/maker-squirrel",
           "config": {
-            "name": "unicode_widget"
+            "name": "unicode_widget",
+            "iconUrl":  "assets/icons/win/icon.ico",
+            "setupIcon":  "assets/icons/win/icon.ico"
           }
         },
         {
