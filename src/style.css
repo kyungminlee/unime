@@ -1,0 +1,112 @@
+@font-face {
+  font-family: 'Unifont';
+  src: url('fonts/unifont-14.0.04.otf') format('opentype'),
+}
+
+* {
+  font-family: Unifont, sans-serif;
+}
+body {
+  background-color: #1E1E1E;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -khtml-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+input#query {
+  width: calc(100% - 8px);
+  background-color: #373737;
+  color: #FFFFFF;
+  border: 0;
+  font-size: large;
+  margin: 2px;
+}
+input#query:disabled {
+  color: #666666;
+}
+#history {
+  height: 40px;
+  overflow: scroll;
+  background-color: #373737;
+  margin: 2px;
+}
+.history-item {
+  width: 36px;
+  height: 36px;
+  background-color: #373737;
+  margin: 2px;
+  font-size: x-large;
+  vertical-align: middle;
+  line-height: 36px;
+  text-align: center;
+  color: #CCCCCC;
+  display: inline-block;
+}
+.history-item:active {
+  cursor: -webkit-grabbing;
+  background-color: #264F78;
+  color: #CCCCCC;
+}
+#result {
+  height: 100%;
+  cursor: default;
+}
+#result-table {
+  width: 100%;
+  border-spacing: 2px;
+}
+#statusbar {
+  background-color: #BBBBBB;
+  width: 100%;
+  position: fixed;
+  bottom: 0%;
+  left: 0%;
+  padding-left: 0.5em;
+  padding-right: 0.5em;
+}
+.character-cell {
+  font-size: xx-large;
+  text-align: center;
+}
+.name-cell {
+  font-size: small;
+}
+.result-row {
+  background-color: #373737;
+  color: #CCCCCC;
+}
+.result-row:active {
+  cursor: -webkit-grabbing;
+  background-color: #264F78;
+  color: #CCCCCC;
+}
+.spinner {
+  width: 40px;
+  height: 40px;
+  background-color: #333;
+
+  margin: 100px auto;
+  -webkit-animation: sk-rotateplane 1.2s infinite ease-in-out;
+  animation: sk-rotateplane 1.2s infinite ease-in-out;
+}
+
+@-webkit-keyframes sk-rotateplane {
+  0% { -webkit-transform: perspective(120px) }
+  50% { -webkit-transform: perspective(120px) rotateY(180deg) }
+  100% { -webkit-transform: perspective(120px) rotateY(180deg)  rotateX(180deg) }
+}
+
+@keyframes sk-rotateplane {
+  0% { 
+    transform: perspective(120px) rotateX(0deg) rotateY(0deg);
+    -webkit-transform: perspective(120px) rotateX(0deg) rotateY(0deg) 
+  } 50% { 
+    transform: perspective(120px) rotateX(-180.1deg) rotateY(0deg);
+    -webkit-transform: perspective(120px) rotateX(-180.1deg) rotateY(0deg) 
+  } 100% { 
+    transform: perspective(120px) rotateX(-180deg) rotateY(-179.9deg);
+    -webkit-transform: perspective(120px) rotateX(-180deg) rotateY(-179.9deg);
+  }
+}

@@ -2,10 +2,14 @@
   "name": "unicode-widget",
   "version": "0.1.10",
   "description": "Unicode Widget",
-  "main": "main.js",
+  "main": "src/main.js",
   "type": "commonjs",
   "scripts": {
-    "start": "electron ."
+    "start": "electron-forge start",
+    "package": "electron-forge package",
+    "make": "electron-forge make",
+    "publish": "electron-forge publish",
+    "lint": "echo \"No linting configured\""
   },
   "repository": "https://github.com/kyungminlee/unicode-widget",
   "keywords": [
@@ -13,10 +17,43 @@
   ],
   "author": "Kyungmin Lee",
   "license": "CC0-1.0",
+  "config": {
+    "forge": {
+      "packagerConfig": {},
+      "makers": [
+        {
+          "name": "@electron-forge/maker-squirrel",
+          "config": {
+            "name": "unicode_widget"
+          }
+        },
+        {
+          "name": "@electron-forge/maker-zip",
+          "platforms": [
+            "darwin"
+          ]
+        },
+        {
+          "name": "@electron-forge/maker-deb",
+          "config": {}
+        },
+        {
+          "name": "@electron-forge/maker-rpm",
+          "config": {}
+        }
+      ]
+    }
+  },
   "devDependencies": {
+    "@electron-forge/cli": "^6.0.0-beta.64",
+    "@electron-forge/maker-deb": "^6.0.0-beta.64",
+    "@electron-forge/maker-rpm": "^6.0.0-beta.64",
+    "@electron-forge/maker-squirrel": "^6.0.0-beta.64",
+    "@electron-forge/maker-zip": "^6.0.0-beta.64",
     "electron": "^19.0.0"
   },
   "dependencies": {
+    "electron-squirrel-startup": "^1.0.0",
     "fuzzy-search": "^3.2.1"
   },
   "build": {
