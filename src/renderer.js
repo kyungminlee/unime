@@ -163,10 +163,10 @@ onkeydown = (event) => {
 };
 
 window.api.send('requestStatus', {});
-window.api.send('cache', {});
+window.api.send('cache', {force: false});
 
 window.api.receive("status", (data) => {
-    const {message} = data;
+    // const {message} = data;
     // console.log(`Got message ${message}`);
     ucdController.receiveStatus(data);
   });
@@ -175,3 +175,7 @@ window.api.receive("searchResult", (data) => {
     // console.log(`Got searchResult ${data}`);
     ucdController.receiveSearchResult(data);
   });
+window.api.receive("cache", (data) => {
+  // console.log(`Received cache ${data}`)
+  window.api.send('cache', data);
+})

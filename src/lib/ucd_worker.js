@@ -36,6 +36,10 @@ class UCDWorker {
       this.status = {ready: false, message: 'Caching...'};
       event.reply("status", this.status);
 
+      if (args.force) {
+        this.cachedUCD.clearCache();
+      }
+
       const totalCount = Object.keys(this.cachedUCD.aliases).length;
       let count = 0;
       const blockSize = Math.max(Math.floor(totalCount / 100), 1);
@@ -49,10 +53,10 @@ class UCDWorker {
           targetCount = Math.min(targetCount + blockSize, totalCount);
         }
       }
-    
       this.cachedUCD.dump(this.cacheFile);
       this.status = {ready: true, message: 'Ready.'};
       event.reply('status', this.status);
+      console.log( `Caching finished`);
     });
 
     this.status = {ready: true, message: 'Ready.'};

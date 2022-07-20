@@ -114,6 +114,10 @@ class CachedUnicodeDatabase {
     return this.searchRaw(query);
   }
 
+  clearCache() {
+    this.cache = {};
+  }
+
   cacheAliases() {
     for(const alias in this.aliases) {
       this.search(alias);
