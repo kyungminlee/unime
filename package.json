@@ -47,7 +47,6 @@
     }
   },
   "files": [
-    "src/ucd.nounihan.simplified.json",
     "fonts/unifont-14.0.04.otf"
   ]
 }

@@ -86,7 +86,6 @@ class UCDWorker {
     this.cachedUCD.dump(this.cacheFile);
     this.status = {ready: true, message: 'Ready.'};
     event.reply('status', this.status);
-    // console.log( `Caching finished`);
   }
 
   dumpCache() {

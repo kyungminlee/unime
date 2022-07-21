@@ -1,20 +1,16 @@
 const ucdController = {
   ready: false,
   sendQuery: (query) => {
-    // console.log(`Sending query ${query}`)
     window.api.send('search', query);
   },
   sendToClipboard: (item) => {
-    // console.log(`sendToClipboard ${item}`)
     window.api.send('clipboard', item);
   },
   receiveStatus: (data) => {
-    // console.log(`Received status ${data}`)
     const queryElement = document.getElementById('query');
     const statusbarElement = document.getElementById('statusbar');
     const {ready, message} = data;
     if (ready) {
-      // console.log(`received ${ready}`);
       ucdController.ready = true;
       viewController.unsetBusy();
       queryElement.removeAttribute('disabled');
@@ -27,9 +23,7 @@ const ucdController = {
     }
   },
   receiveSearchResult: (data) => {
-    // console.log(`Received search result ${data}`)
     const queryElement = document.getElementById('query');
-    // const statusbarElement = document.getElementById('statusbar');
     const {result} = data;
     ucdController.ready = true;
     queryElement.removeAttribute('disabled');
@@ -130,7 +124,6 @@ const viewController = {
     if (!ucdController.ready) { return; }
     const queryElement = document.getElementById('query');
     const statusbarElement = document.getElementById('statusbar');
-    // const resultElement = document.getElementById("result");
 
     const query = queryElement.value.trim();
     if (query.length >= 2) {
@@ -162,20 +155,9 @@ onkeydown = (event) => {
   }
 };
 
+window.api.receive("status", (data) => { ucdController.receiveStatus(data); });
+window.api.receive("searchResult", (data) => { ucdController.receiveSearchResult(data); });
+window.api.receive("cache", (data) => { window.api.send('cache', data); });
+
 window.api.send('requestStatus', {});
 window.api.send('cache', {force: false});
-
-window.api.receive("status", (data) => {
-    // const {message} = data;
-    // console.log(`Got message ${message}`);
-    ucdController.receiveStatus(data);
-  });
-
-window.api.receive("searchResult", (data) => {
-    // console.log(`Got searchResult ${data}`);
-    ucdController.receiveSearchResult(data);
-  });
-window.api.receive("cache", (data) => {
-  // console.log(`Received cache ${data}`)
-  window.api.send('cache', data);
-})

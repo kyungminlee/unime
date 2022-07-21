@@ -112,7 +112,6 @@ class CachedUnicodeDatabase {
       const hits = cacheHits.map((cp) => ({cp: parseInt(cp), na: this.ucd.lookup(cp)}));
       return hits;
     }
-    // console.log(`cache miss: ${query}`)
     return this.searchRaw(query);
   }
 
