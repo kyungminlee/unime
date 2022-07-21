@@ -27,26 +27,19 @@
   "build": {
     "appId": "com.unime.app",
     "win": {
-      "target": [
-        "nsis",
-        "portable"
-      ]
+      "target": ["nsis", "portable"]
     },
     "linux": {
-      "target": [
-        "AppImage",
-        "tar.xz"
-      ]
+      "target": ["AppImage", "tar.xz"]
     },
     "mac": {
       "category": "public.app-category.utilities",
-      "target": [
-        "default"
-      ],
+      "target": [ "default" ],
       "hardenedRuntime": true
     }
   },
   "files": [
-    "fonts/unifont-14.0.04.otf"
+    "fonts/*",
+    "assets/**/*"
   ]
 }

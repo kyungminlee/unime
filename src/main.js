@@ -2,7 +2,7 @@ const { Menu, MenuItem, session } = require('electron');
 const electron = require('electron');
 const path = require('path');
 
-const { UCDWorker } = require(path.join(__dirname, 'lib', 'ucd_worker.js'));
+const { UCDWorker } = require(path.join(__dirname, 'lib', 'ucdWorker.js'));
 
 const app = electron.app;
 const BrowserWindow = electron.BrowserWindow;
@@ -16,7 +16,7 @@ async function createWindow() {
     height: 600, 
     alwaysOnTop: true, 
     frame: true,
-    icon: path.join(__dirname, '..', 'build', 'icons', '96x96.png'),
+    icon: path.join(__dirname, '..', 'assets', 'icons', '96x96.png'),
     webPreferences: {
       nodeIntegration: false,
       contextIsolation: true,
