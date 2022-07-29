@@ -1,7 +1,7 @@
 const { contextBridge, ipcRenderer } = require('electron');
 
 contextBridge.exposeInMainWorld(
-  "api", {
+  'api', {
     send: (channel, data) => {
       const validChannels = ['search', 'requestStatus', 'clipboard', 'cache'];
       if (validChannels.includes(channel)) {

@@ -11,30 +11,30 @@ class UCDWorker {
     this.status = {ready: false, message: 'Initializing...'};
     this.cachedUCD = new UCD.CachedUnicodeDatabase(dataFile, configFile, aliasCacheFile, cacheFile);
 
-    ipcMain.on("search", (event, args) => {
+    ipcMain.on('search', (event, args) => {
       try {
         const { query } = args;
         const result = this.cachedUCD.search(query);
-        event.reply("searchResult", { result });
+        event.reply('searchResult', { result });
       } catch (err) {
         this.status = { ready: true, message: `Search failed. ${err}` };
-        event.reply("status", this.status);
+        event.reply('status', this.status);
       }
     });
 
-    ipcMain.on("requestStatus", (event, _args) => {
-      event.reply("status", this.status);
+    ipcMain.on('requestStatus', (event, _args) => {
+      event.reply('status', this.status);
     });
 
-    ipcMain.on("clipboard", (event, args) => {
+    ipcMain.on('clipboard', (event, args) => {
       clipboard.writeText(args);
       this.status = {ready: true, message: `Character ${args} copied to clipboard.`};
-      event.reply("status", this.status);
+      event.reply('status', this.status);
     });
 
     ipcMain.on('cache', (event, args) => {
       this.status = {ready: false, message: 'Caching...'};
-      event.reply("status", this.status);
+      event.reply('status', this.status);
 
       if (args.force) {
         this.cachedUCD.clearCache();
@@ -64,7 +64,7 @@ class UCDWorker {
 
   async rebuildCache(event, args) {
     this.status = {ready: false, message: 'Caching...'};
-    event.reply("status", this.status);
+    event.reply('status', this.status);
 
     if (args.force) {
       this.cachedUCD.clearCache();

@@ -42,7 +42,7 @@ class CachedUnicodeDatabase {
   }
 
   loadConfig(filename) {
-    const config = JSON.parse(fs.readFileSync(filename, "utf8"));
+    const config = JSON.parse(fs.readFileSync(filename, 'utf8'));
     if (config.aliases) { this.aliases = config.aliases; }
     if (config.maxHits) { this.maxHits = config.maxHits; }
     // TODO: other configs (unicode categories, number of ...)
@@ -52,7 +52,7 @@ class CachedUnicodeDatabase {
     const {append} = options;
     this.history = [];
     try {
-      const data = JSON.parse(fs.readFileSync(filename, "utf8"));
+      const data = JSON.parse(fs.readFileSync(filename, 'utf8'));
       if (data) {
         if (append) {
           for (const item of data) {

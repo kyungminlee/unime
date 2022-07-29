@@ -39,14 +39,14 @@ const kMaxHistoryLength = 256;
 
 const viewController = {
   clear: () => {
-    const resultElement = document.getElementById("result");
+    const resultElement = document.getElementById('result');
     while(resultElement.firstChild) {
       resultElement.removeChild(resultElement.firstChild);
     }
   },
 
   setBusy: () => {
-    const resultElement = document.getElementById("result");
+    const resultElement = document.getElementById('result');
     const queryElement = document.getElementById('query');
     queryElement.setAttribute('disabled', 'disabled');
     viewController.clear();
@@ -57,7 +57,7 @@ const viewController = {
   }, //setBusy
 
   unsetBusy: () => {
-    const resultElement = document.getElementById("result");
+    const resultElement = document.getElementById('result');
     const spinnerElement = document.getElementById('spinner');
     if (spinnerElement) {
       resultElement.removeChild(spinnerElement);
@@ -209,7 +209,7 @@ const viewController = {
   }, // addRow
 
   update(hits) {
-    const resultElement = document.getElementById("result");
+    const resultElement = document.getElementById('result');
     const statusbarElement = document.getElementById('statusbar');
     const tab = document.createElement('table', {id: 'result-table'});
     tab.setAttribute('id', 'result-table');
@@ -262,14 +262,14 @@ onkeydown = (event) => {
   const queryElement = document.getElementById('query');
   queryElement.focus();
   if (event.key == 'Escape') {
-    queryElement.value = "";
+    queryElement.value = '';
   }
 };
 
-window.api.receive("status", (data) => { ucdController.receiveStatus(data); });
-window.api.receive("searchResult", (data) => { ucdController.receiveSearchResult(data); });
-window.api.receive("cache", (data) => { window.api.send('cache', data); });
-window.api.receive("clearHistory", (data) => {
+window.api.receive('status', (data) => { ucdController.receiveStatus(data); });
+window.api.receive('searchResult', (data) => { ucdController.receiveSearchResult(data); });
+window.api.receive('cache', (data) => { window.api.send('cache', data); });
+window.api.receive('clearHistory', (data) => {
   for (type of data.type) {
     if (type === 'unpinned') {
       viewController.clearUnpinnedHistory();
