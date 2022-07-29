@@ -9,7 +9,7 @@ contextBridge.exposeInMainWorld(
       }
     },
     receive: (channel, func) => {
-      const validChannels = ['searchResult', 'status', 'cache'];
+      const validChannels = ['searchResult', 'status', 'cache', 'clearHistory'];
       if (validChannels.includes(channel)) {
       	ipcRenderer.on(channel, (_event, ...args) => func(...args));
       }
