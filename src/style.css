@@ -1,9 +1,5 @@
-@font-face {
-  font-family: 'Unifont';
-  src: url('fonts/unifont-14.0.04.otf') format('opentype'),
-}
 * {
-  font-family: Unifont, sans-serif;
+  font-family: sans-serif;
 }
 body {
   background-color: #1f1d1d;
