@@ -17,24 +17,33 @@
   "author": "Kyungmin Lee",
   "license": "CC0-1.0",
   "devDependencies": {
-    "electron": "^19.0.0",
-    "electron-builder": "^23.3.1"
+    "electron": "^35.0.2",
+    "electron-builder": "^25.1.8"
   },
   "dependencies": {
     "fuzzy-search": "^3.2.1",
-    "lru-cache": "^7.13.1"
+    "lru-cache": "^7.13.1",
+    "update-electron-app": "^3.1.1"
   },
   "build": {
     "appId": "com.unime.app",
     "win": {
-      "target": ["nsis", "portable"]
+      "target": [
+        "nsis",
+        "portable"
+      ]
     },
     "linux": {
-      "target": ["AppImage", "tar.xz"]
+      "target": [
+        "AppImage",
+        "tar.xz"
+      ]
     },
     "mac": {
       "category": "public.app-category.utilities",
-      "target": [ "default" ],
+      "target": [
+        "default"
+      ],
       "hardenedRuntime": true
     }
   },
