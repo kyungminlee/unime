@@ -1,3 +1,7 @@
+const MAX_HISTORY_LENGTH = 256;
+
+const $ = (id) => document.getElementById(id);
+
 const ucdController = {
   ready: false,
 
@@ -9,127 +13,111 @@ const ucdController = {
     window.api.send('clipboard', item);
   },
 
-  receiveStatus(data) {
-    const queryElement = document.getElementById('query');
-    const statusbarElement = document.getElementById('statusbar');
-    const {ready, message} = data;
+  receiveStatus({ ready, message }) {
+    const queryElement = $('query');
+    const statusbarElement = $('statusbar');
+    ucdController.ready = ready;
     if (ready) {
-      ucdController.ready = true;
       viewController.unsetBusy();
       queryElement.removeAttribute('disabled');
-      statusbarElement.innerHTML = message;
     } else {
-      ucdController.ready = false;
       viewController.setBusy();
       queryElement.setAttribute('disabled', 'disabled');
-      statusbarElement.innerHTML = message;
     }
+    statusbarElement.textContent = message;
   },
 
-  receiveSearchResult(data) {
-    const queryElement = document.getElementById('query');
-    const {result} = data;
+  receiveSearchResult({ result }) {
     ucdController.ready = true;
-    queryElement.removeAttribute('disabled');
+    $('query').removeAttribute('disabled');
     viewController.update(result);
   },
 };
 
-const kMaxHistoryLength = 256;
-
 const viewController = {
-  clear: () => {
-    const resultElement = document.getElementById('result');
-    while(resultElement.firstChild) {
-      resultElement.removeChild(resultElement.firstChild);
-    }
+  clear() {
+    $('result').replaceChildren();
   },
 
-  setBusy: () => {
-    const resultElement = document.getElementById('result');
-    const queryElement = document.getElementById('query');
-    queryElement.setAttribute('disabled', 'disabled');
-    viewController.clear();
+  setBusy() {
+    const resultElement = $('result');
+    $('query').setAttribute('disabled', 'disabled');
     const spinner = document.createElement('div');
-    spinner.setAttribute('class', 'spinner');
-    spinner.setAttribute('id', 'spinner');
-    resultElement.appendChild(spinner);
-  }, //setBusy
+    spinner.classList.add('spinner');
+    spinner.id = 'spinner';
+    resultElement.replaceChildren(spinner);
+  },
 
-  unsetBusy: () => {
-    const resultElement = document.getElementById('result');
-    const spinnerElement = document.getElementById('spinner');
-    if (spinnerElement) {
-      resultElement.removeChild(spinnerElement);
+  unsetBusy() {
+    $('spinner')?.remove();
+  },
+
+  _findExistingHistoryItem(ch) {
+    for (const item of $('history-pinned').children) {
+      if (item.dataset.ch === ch) {
+        item.remove();
+        return item;
+      }
     }
+    for (const item of $('history-unpinned').children) {
+      if (item.dataset.ch === ch) {
+        item.remove();
+        return item;
+      }
+    }
+    return null;
   },
 
   _getHistoryItem(ch, na) {
-    const pinnedHistoryElement = document.getElementById('history-pinned');
-    const unpinnedHistoryElement = document.getElementById('history-unpinned');
-    for (item of pinnedHistoryElement.children) {
-      if (item.innerText === ch) {
-        pinnedHistoryElement.removeChild(item);
-        return item;
-      }
-    }
-    for (item of unpinnedHistoryElement.children) {
-      if (item.innerText === ch) {
-        unpinnedHistoryElement.removeChild(item);
-        return item;
-      }
-    }
-    return viewController._createHistoryItem(ch, na);
+    return viewController._findExistingHistoryItem(ch) ?? viewController._createHistoryItem(ch, na);
   },
 
   _createHistoryItem(ch, na) {
     const item = document.createElement('div');
-    item.innerText = ch;
+    item.textContent = ch;
     item.classList.add('history-item');
-    item.setAttribute('title', `${na} (\U+${ch.codePointAt(0).toString(16)})\nRight click to pin/unpin.`);
-    item.setAttribute('data-ch', ch);
-    item.setAttribute('data-na', na);
-    item.onclick = () => {
+    item.title = `${na} (U+${ch.codePointAt(0).toString(16).toUpperCase()})\nRight click to pin/unpin.`;
+    item.dataset.ch = ch;
+    item.dataset.na = na;
+
+    item.addEventListener('click', () => {
       ucdController.sendToClipboard(ch);
       viewController.addHistory(ch, na);
-    };
-    const pinnedHistoryElement = document.getElementById('history-pinned');
-    const unpinnedHistoryElement = document.getElementById('history-unpinned');
+    });
 
-    item.oncontextmenu = () => {
-      if (viewController.isPinned(item.getAttribute('data-ch'))) {
-        pinnedHistoryElement.removeChild(item);
-        unpinnedHistoryElement.prepend(item);
+    item.addEventListener('contextmenu', () => {
+      const pinned = $('history-pinned');
+      const unpinned = $('history-unpinned');
+      if (viewController.isPinned(item.dataset.ch)) {
+        pinned.removeChild(item);
+        unpinned.prepend(item);
       } else {
-        unpinnedHistoryElement.removeChild(item);
-        pinnedHistoryElement.append(item);
+        unpinned.removeChild(item);
+        pinned.append(item);
       }
       viewController.storeHistory();
-    };
+    });
+
     return item;
   },
 
   _addPinnedHistory(ch, na) {
-    const pinnedHistoryElement = document.getElementById('history-pinned');
-    const unpinnedHistoryElement = document.getElementById('history-unpinned');
     const item = viewController._getHistoryItem(ch, na);
-    pinnedHistoryElement.append(item);
+    $('history-pinned').append(item);
   },
 
   _addUnpinnedHistory(ch, na) {
-    const pinnedHistoryElement = document.getElementById('history-pinned');
-    const unpinnedHistoryElement = document.getElementById('history-unpinned');
+    const unpinned = $('history-unpinned');
     const item = viewController._getHistoryItem(ch, na);
-    while (unpinnedHistoryElement.children.length >= kMaxHistoryLength) {
-      unpinnedHistoryElement.removeChild(unpinnedHistoryElement.lastChild);
+    while (unpinned.children.length >= MAX_HISTORY_LENGTH) {
+      unpinned.removeChild(unpinned.lastChild);
     }
-    unpinnedHistoryElement.prepend(item);
+    unpinned.prepend(item);
   },
 
   isPinned(ch) {
-    const pinnedHistoryElement = document.getElementById('history-pinned');
-    for (child of pinnedHistoryElement.children) {
-      if (child.innerText === ch) {
+    for (const child of $('history-pinned').children) {
+      if (child.dataset.ch === ch) {
         return true;
       }
     }
@@ -139,138 +127,120 @@ const viewController = {
   addHistory(ch, na) {
     if (viewController.isPinned(ch)) { return; }
     viewController._addUnpinnedHistory(ch, na);
-    viewController.storeHistory(ch, na);
+    viewController.storeHistory();
   },
-  
+
   storeHistory() {
-    const pinnedHistoryElement = document.getElementById('history-pinned');
-    const unpinnedHistoryElement = document.getElementById('history-unpinned');
-    const getChNaList = (element) => {
-      return Array.from(element.children).map(
-        (item) => { return { ch: item.getAttribute('data-ch'), na: item.getAttribute('data-na'), } }
-      )
-    };
-    localStorage.setItem('history-pinned', JSON.stringify(getChNaList(pinnedHistoryElement)));
-    localStorage.setItem('history-unpinned', JSON.stringify(getChNaList(unpinnedHistoryElement)));
+    const serialize = (element) =>
+      Array.from(element.children).map((item) => ({
+        ch: item.dataset.ch,
+        na: item.dataset.na,
+      }));
+    localStorage.setItem('history-pinned', JSON.stringify(serialize($('history-pinned'))));
+    localStorage.setItem('history-unpinned', JSON.stringify(serialize($('history-unpinned'))));
   },
 
   clearPinnedHistory() {
-    const historyElement = document.getElementById('history-pinned');
-    while (historyElement.firstChild) {
-      historyElement.removeChild(historyElement.firstChild);
-    }
+    $('history-pinned').replaceChildren();
     viewController.storeHistory();
   },
 
   clearUnpinnedHistory() {
-    const historyElement = document.getElementById('history-unpinned');
-    while (historyElement.firstChild) {
-      historyElement.removeChild(historyElement.firstChild);
-    }
+    $('history-unpinned').replaceChildren();
     viewController.storeHistory();
   },
 
   loadPinnedHistory() {
-    const historyElement = document.getElementById('history-pinned');
-    const historyDataJson = localStorage.getItem('history-pinned');
-    if (historyDataJson) {
-      const historyData = JSON.parse(historyDataJson);
-      for (const {ch, na} of historyData) {
-        viewController._addPinnedHistory(ch, na);
-      }
+    const json = localStorage.getItem('history-pinned');
+    if (!json) { return; }
+    for (const { ch, na } of JSON.parse(json)) {
+      viewController._addPinnedHistory(ch, na);
     }
   },
 
   loadUnpinnedHistory() {
-    const historyElement = document.getElementById('history-unpinned');
-    const historyDataJson = localStorage.getItem('history-unpinned');
-    if (historyDataJson) {
-      const historyData = JSON.parse(historyDataJson);
-      for (const {ch, na} of historyData) {
-        viewController._addUnpinnedHistory(ch, na);
-      }
+    const json = localStorage.getItem('history-unpinned');
+    if (!json) { return; }
+    for (const { ch, na } of JSON.parse(json)) {
+      viewController._addUnpinnedHistory(ch, na);
     }
   },
 
-
   addRow(tab, ch, na) {
     const row = tab.insertRow(-1);
-    const cell1 = row.insertCell(0);
-    const cell2 = row.insertCell(1);
-    row.setAttribute('class', 'result-row');
-    cell1.setAttribute('class', 'character-cell');
-    cell2.setAttribute('class', 'name-cell');
-    cell1.innerHTML = ch;
-    cell2.innerHTML = na;
-    row.onclick = () => {
+    row.classList.add('result-row');
+    const charCell = row.insertCell(0);
+    const nameCell = row.insertCell(1);
+    charCell.classList.add('character-cell');
+    nameCell.classList.add('name-cell');
+    charCell.textContent = ch;
+    nameCell.textContent = na;
+    row.addEventListener('click', () => {
       ucdController.sendToClipboard(ch);
       viewController.addHistory(ch, na);
-    }
-  }, // addRow
+    });
+  },
 
   update(hits) {
-    const resultElement = document.getElementById('result');
-    const statusbarElement = document.getElementById('statusbar');
-    const tab = document.createElement('table', {id: 'result-table'});
-    tab.setAttribute('id', 'result-table');
+    const statusbarElement = $('statusbar');
+    const tab = document.createElement('table');
+    tab.id = 'result-table';
     let count = 0;
-    for(item of hits) {
+    for (const item of hits) {
       try {
         const ch = String.fromCodePoint(item.cp);
-        const na = item.na;
-        viewController.addRow(tab, ch, na);
+        viewController.addRow(tab, ch, item.na);
         ++count;
-      } catch(err) {
-        // console.log(`Error in update: ${err}`);
+      } catch {
+        // Invalid code point — skip silently.
       }
     }
-    viewController.clear();
-    resultElement.appendChild(tab);
-    statusbarElement.innerHTML = `Found ${count} results.`
-  }, // update
-  
+    $('result').replaceChildren(tab);
+    statusbarElement.textContent = `Found ${count} results.`;
+  },
+
   searchHandler() {
-    if (!ucdController.ready) { return; }
-    const queryElement = document.getElementById('query');
-    const statusbarElement = document.getElementById('statusbar');
+    if (!ucdController.ready) { return false; }
+    const queryElement = $('query');
+    const statusbarElement = $('statusbar');
 
     const query = queryElement.value.trim();
     if (query.length >= 2) {
-      statusbarElement.innerHTML = 'Searching...';
+      statusbarElement.textContent = 'Searching...';
       viewController.setBusy();
-      ucdController.sendQuery({query});
+      ucdController.sendQuery({ query });
     } else {
-      statusbarElement.innerHTML = 'Results cleared.';
+      statusbarElement.textContent = 'Results cleared.';
     }
     return false;
-  }, // searchHandler
-}; // viewController
+  },
+};
 
-onload = () => {
+window.addEventListener('load', () => {
   viewController.loadPinnedHistory();
   viewController.loadUnpinnedHistory();
-  const queryElement = document.getElementById('query');
-  queryElement.onkeyup = (e) => {
-    if (e.key == 'Enter') {
+  const queryElement = $('query');
+  queryElement.addEventListener('keyup', (e) => {
+    if (e.key === 'Enter') {
       viewController.searchHandler();
     }
-  };
+  });
   queryElement.focus();
-};
+});
 
-onkeydown = (event) => {
-  const queryElement = document.getElementById('query');
+window.addEventListener('keydown', (event) => {
+  const queryElement = $('query');
   queryElement.focus();
-  if (event.key == 'Escape') {
+  if (event.key === 'Escape') {
     queryElement.value = '';
   }
-};
+});
 
-window.api.receive('status', (data) => { ucdController.receiveStatus(data); });
-window.api.receive('searchResult', (data) => { ucdController.receiveSearchResult(data); });
-window.api.receive('cache', (data) => { window.api.send('cache', data); });
+window.api.receive('status', (data) => ucdController.receiveStatus(data));
+window.api.receive('searchResult', (data) => ucdController.receiveSearchResult(data));
+window.api.receive('cache', (data) => window.api.send('cache', data));
 window.api.receive('clearHistory', (data) => {
-  for (type of data.type) {
+  for (const type of data.type) {
     if (type === 'unpinned') {
       viewController.clearUnpinnedHistory();
     } else if (type === 'pinned') {
@@ -280,5 +250,4 @@ window.api.receive('clearHistory', (data) => {
 });
 
 window.api.send('requestStatus', {});
-window.api.send('cache', {force: false});
-
+window.api.send('cache', { force: false });

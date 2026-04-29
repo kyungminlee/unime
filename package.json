@@ -4,6 +4,9 @@
   "description": "Unicode Input",
   "main": "src/main.js",
   "type": "commonjs",
+  "engines": {
+    "node": ">=20"
+  },
   "scripts": {
     "start": "electron .",
     "app:dir": "electron-builder --dir",
@@ -22,7 +25,7 @@
   },
   "dependencies": {
     "fuzzy-search": "^3.2.1",
-    "lru-cache": "^7.13.1",
+    "lru-cache": "^11.0.2",
     "update-electron-app": "^3.1.1"
   },
   "build": {

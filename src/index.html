@@ -1,14 +1,16 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
   <head>
     <meta charset="UTF-8">
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self'">
-    <link rel="stylesheet" type="text/css" href="style.css">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'">
+    <link rel="stylesheet" href="style.css">
     <title>unime</title>
   </head>
   <body>
-    <input type="search" id="query" placeholder="Type LaTeX symbol, HTML entity, or character name">
-    <div id="history"><div id="history-pinned"></div><div id="history-unpinned"></div></div>
+    <input type="search" id="query" placeholder="Type LaTeX symbol, HTML entity, or character name" autocomplete="off" spellcheck="false">
+    <div id="history">
+      <div id="history-pinned"></div><div id="history-unpinned"></div>
+    </div>
     <div id="result"></div>
     <div id="statusbar"></div>
     <script src="renderer.js"></script>
