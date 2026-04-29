@@ -1,18 +1,17 @@
 const { contextBridge, ipcRenderer } = require('electron');
 
-contextBridge.exposeInMainWorld(
-  'api', {
-    send: (channel, data) => {
-      const validChannels = ['search', 'requestStatus', 'clipboard', 'cache'];
-      if (validChannels.includes(channel)) {
-        ipcRenderer.send(channel, data);
-      }
-    },
-    receive: (channel, func) => {
-      const validChannels = ['searchResult', 'status', 'cache', 'clearHistory'];
-      if (validChannels.includes(channel)) {
-      	ipcRenderer.on(channel, (_event, ...args) => func(...args));
-      }
+const SEND_CHANNELS = Object.freeze(['search', 'requestStatus', 'clipboard', 'cache']);
+const RECEIVE_CHANNELS = Object.freeze(['searchResult', 'status', 'cache', 'clearHistory']);
+
+contextBridge.exposeInMainWorld('api', {
+  send: (channel, data) => {
+    if (SEND_CHANNELS.includes(channel)) {
+      ipcRenderer.send(channel, data);
     }
-  }
-);
+  },
+  receive: (channel, listener) => {
+    if (RECEIVE_CHANNELS.includes(channel)) {
+      ipcRenderer.on(channel, (_event, ...args) => listener(...args));
+    }
+  },
+});

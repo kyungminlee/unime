@@ -1,6 +1,5 @@
-const path = require('path');
-const UCD = require(path.join(__dirname, 'ucd.js'));
 const { ipcMain, clipboard } = require('electron');
+const { CachedUnicodeDatabase } = require('./ucd.js');
 
 class UCDWorker {
   constructor(dataFile, configFile, aliasCacheFile, cacheFile) {
@@ -8,8 +7,8 @@ class UCDWorker {
     this.configFile = configFile;
     this.aliasCacheFile = aliasCacheFile;
     this.cacheFile = cacheFile;
-    this.status = {ready: false, message: 'Initializing...'};
-    this.cachedUCD = new UCD.CachedUnicodeDatabase(dataFile, configFile, aliasCacheFile, cacheFile);
+    this.status = { ready: false, message: 'Initializing...' };
+    this.cachedUCD = new CachedUnicodeDatabase(dataFile, configFile, aliasCacheFile, cacheFile);
 
     ipcMain.on('search', (event, args) => {
       try {
@@ -22,79 +21,59 @@ class UCDWorker {
       }
     });
 
-    ipcMain.on('requestStatus', (event, _args) => {
+    ipcMain.on('requestStatus', (event) => {
       event.reply('status', this.status);
     });
 
     ipcMain.on('clipboard', (event, args) => {
       clipboard.writeText(args);
-      this.status = {ready: true, message: `Character ${args} copied to clipboard.`};
+      this.status = { ready: true, message: `Character ${args} copied to clipboard.` };
       event.reply('status', this.status);
     });
 
     ipcMain.on('cache', (event, args) => {
-      this.status = {ready: false, message: 'Caching...'};
-      event.reply('status', this.status);
-
-      if (args.force) {
-        this.cachedUCD.clearCache();
-      }
-
-      const totalCount = Object.keys(this.cachedUCD.aliases).length;
-      let count = 0;
-      const blockSize = Math.max(Math.floor(totalCount / 100), 1);
-      let targetCount = Math.min(blockSize, totalCount);
-      for(const alias in this.cachedUCD.aliases) {
-        this.cachedUCD.search(alias);
-        ++count;
-        if (count >= targetCount) {
-          this.status = {ready: false, message: `Cached ${count}/${totalCount} items.`}
-          event.reply('status', this.status);
-          targetCount = Math.min(targetCount + blockSize, totalCount);
-        }
-      }
-      this.cachedUCD.dump(this.cacheFile);
-      this.status = {ready: true, message: 'Ready.'};
-      event.reply('status', this.status);
-      // console.log( `Caching finished`);
+      this.rebuildCache(event, args);
     });
 
-    this.status = {ready: true, message: 'Ready.'};
+    this.status = { ready: true, message: 'Ready.' };
   }
 
-  async rebuildCache(event, args) {
-    this.status = {ready: false, message: 'Caching...'};
+  rebuildCache(event, { force } = {}) {
+    this.status = { ready: false, message: 'Caching...' };
     event.reply('status', this.status);
 
-    if (args.force) {
+    if (force) {
       this.cachedUCD.clearCache();
     }
 
-    const totalCount = Object.keys(this.cachedUCD.aliases).length;
-    let count = 0;
+    const aliasKeys = Object.keys(this.cachedUCD.aliases);
+    const totalCount = aliasKeys.length;
     const blockSize = Math.max(Math.floor(totalCount / 100), 1);
-    let targetCount = Math.min(blockSize, totalCount);
-    for(const alias in this.cachedUCD.aliases) {
+    let count = 0;
+    let nextReportAt = blockSize;
+
+    for (const alias of aliasKeys) {
       this.cachedUCD.search(alias);
       ++count;
-      if (count >= targetCount) {
-        this.status = {ready: false, message: `Cached ${count}/${totalCount} items.`}
+      if (count >= nextReportAt) {
+        this.status = { ready: false, message: `Cached ${count}/${totalCount} items.` };
         event.reply('status', this.status);
-        targetCount = Math.min(targetCount + blockSize, totalCount);
+        nextReportAt += blockSize;
       }
     }
+
     this.cachedUCD.dump(this.cacheFile);
-    this.status = {ready: true, message: 'Ready.'};
+    this.status = { ready: true, message: 'Ready.' };
     event.reply('status', this.status);
   }
 
   dumpCache() {
     this.cachedUCD.dump(this.cacheFile);
   }
-  
+
   getStatus() {
     return this.status;
   }
 }
 
-module.exports.UCDWorker = UCDWorker;
+module.exports = { UCDWorker };
