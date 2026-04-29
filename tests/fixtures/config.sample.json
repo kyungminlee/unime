@@ -1,0 +1,9 @@
+{
+  "maxHits": 100,
+  "aliases": {
+    "\\sqrt": "SQUARE ROOT",
+    "\\cbrt": "CUBE ROOT",
+    "\\alpha": "GREEK SMALL LETTER ALPHA",
+    "\\otimes": "CIRCLED TIMES"
+  }
+}
