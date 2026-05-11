@@ -2,7 +2,7 @@
   "name": "unime",
   "version": "0.3.3",
   "description": "Unicode Input",
-  "main": "src/main.js",
+  "main": "src/main/index.js",
   "type": "commonjs",
   "engines": {
     "node": ">=20"
@@ -11,7 +11,9 @@
     "start": "electron .",
     "app:dir": "electron-builder --dir",
     "app:dist": "electron-builder",
-    "lint": "echo \"No linting configured\""
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "test": "node --test tests/*.test.js"
   },
   "repository": "https://github.com/kyungminlee/unime",
   "keywords": [
@@ -21,7 +23,9 @@
   "license": "CC0-1.0",
   "devDependencies": {
     "electron": "^35.0.2",
-    "electron-builder": "^25.1.8"
+    "electron-builder": "^25.1.8",
+    "eslint": "^9.21.0",
+    "globals": "^15.15.0"
   },
   "dependencies": {
     "fuzzy-search": "^3.2.1",
@@ -30,6 +34,11 @@
   },
   "build": {
     "appId": "com.unime.app",
+    "files": [
+      "src/**/*",
+      "assets/**/*",
+      "package.json"
+    ],
     "win": {
       "target": [
         "nsis",
@@ -49,8 +58,5 @@
       ],
       "hardenedRuntime": true
     }
-  },
-  "files": [
-    "assets/**/*"
-  ]
+  }
 }
