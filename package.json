@@ -22,10 +22,10 @@
   "author": "Kyungmin Lee",
   "license": "CC0-1.0",
   "devDependencies": {
-    "electron": "^35.0.2",
-    "electron-builder": "^25.1.8",
-    "eslint": "^9.21.0",
-    "globals": "^15.15.0"
+    "electron": "^42.0.1",
+    "electron-builder": "^26.8.1",
+    "eslint": "^10.3.0",
+    "globals": "^17.6.0"
   },
   "dependencies": {
     "fuzzy-search": "^3.2.1",
