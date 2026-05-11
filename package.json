@@ -29,8 +29,7 @@
   },
   "dependencies": {
     "fuzzy-search": "^3.2.1",
-    "lru-cache": "^11.0.2",
-    "update-electron-app": "^3.1.1"
+    "lru-cache": "^11.0.2"
   },
   "build": {
     "appId": "com.unime.app",

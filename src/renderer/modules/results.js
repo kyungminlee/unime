@@ -42,7 +42,3 @@ export function render(hits) {
   result.replaceChildren(table);
   statusbar.textContent = `Found ${count} results.`;
 }
-
-export function clear() {
-  elements().result.replaceChildren();
-}

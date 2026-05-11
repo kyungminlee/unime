@@ -19,8 +19,13 @@ const DEFAULT_CONFIG = Object.freeze({
  * @returns {UnimeConfig}
  */
 function loadConfig(filename) {
-  const raw = fs.readFileSync(filename, 'utf8');
-  const parsed = JSON.parse(raw);
+  let parsed;
+  try {
+    parsed = JSON.parse(fs.readFileSync(filename, 'utf8'));
+  } catch (err) {
+    console.error(`Failed to load config from ${filename}; using defaults.`, err);
+    return { maxHits: DEFAULT_CONFIG.maxHits, aliases: {} };
+  }
   return {
     maxHits: typeof parsed.maxHits === 'number' ? parsed.maxHits : DEFAULT_CONFIG.maxHits,
     aliases: parsed.aliases && typeof parsed.aliases === 'object' ? parsed.aliases : {},

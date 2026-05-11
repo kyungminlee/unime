@@ -26,12 +26,16 @@ const state = {
 function start() {
   state.window = createMainWindow();
   state.window.on('closed', () => { state.window = null; });
-  buildAppMenu(() => state.window);
   state.worker = new UCDWorker({
     dataFile: paths.ucd,
     configFile: paths.config,
     aliasCacheFile: paths.aliasCache,
     cacheFile: paths.userCache(),
+    getWebContents: () => state.window?.webContents ?? null,
+  });
+  buildAppMenu({ getWindow: () => state.window, getWorker: () => state.worker });
+  state.window.webContents.once('did-finish-load', () => {
+    state.worker?.rebuildCache({ force: false });
   });
 }
 

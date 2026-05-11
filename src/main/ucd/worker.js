@@ -16,10 +16,12 @@ class UCDWorker {
    *   configFile: string,
    *   aliasCacheFile: string,
    *   cacheFile: string,
+   *   getWebContents: () => import('electron').WebContents | null | undefined,
    * }} options
    */
-  constructor({ dataFile, configFile, aliasCacheFile, cacheFile }) {
+  constructor({ dataFile, configFile, aliasCacheFile, cacheFile, getWebContents }) {
     this.cacheFile = cacheFile;
+    this.getWebContents = getWebContents;
 
     this.engine = new UnicodeSearchEngine({
       dataFile,
@@ -35,39 +37,42 @@ class UCDWorker {
   }
 
   _registerHandlers() {
-    ipcMain.on(CHANNELS.SEND.SEARCH, (event, args) => this._handleSearch(event, args));
-    ipcMain.on(CHANNELS.SEND.REQUEST_STATUS, (event) => this._handleRequestStatus(event));
-    ipcMain.on(CHANNELS.SEND.CLIPBOARD, (event, payload) => this._handleClipboard(event, payload));
-    ipcMain.on(CHANNELS.SEND.CACHE, (event, args) => this._rebuildCache(event, args));
+    ipcMain.on(CHANNELS.SEND.SEARCH, (_event, args) => this._handleSearch(args));
+    ipcMain.on(CHANNELS.SEND.REQUEST_STATUS, () => this._sendStatus(this.status));
+    ipcMain.on(CHANNELS.SEND.CLIPBOARD, (_event, payload) => this._handleClipboard(payload));
   }
 
-  _setStatus(event, status) {
+  _send(channel, payload) {
+    this.getWebContents()?.send(channel, payload);
+  }
+
+  _setStatus(status) {
     this.status = status;
-    event.reply(CHANNELS.RECEIVE.STATUS, status);
+    this._sendStatus(status);
   }
 
-  _handleSearch(event, args) {
+  _sendStatus(status) {
+    this._send(CHANNELS.RECEIVE.STATUS, status);
+  }
+
+  _handleSearch(args) {
     try {
       const { query } = args ?? {};
       const result = this.engine.search(String(query ?? ''));
-      event.reply(CHANNELS.RECEIVE.SEARCH_RESULT, { result });
+      this._send(CHANNELS.RECEIVE.SEARCH_RESULT, { result });
     } catch (err) {
-      this._setStatus(event, { ready: true, message: `Search failed. ${err}` });
+      this._setStatus({ ready: true, message: `Search failed. ${err}` });
     }
   }
 
-  _handleRequestStatus(event) {
-    event.reply(CHANNELS.RECEIVE.STATUS, this.status);
-  }
-
-  _handleClipboard(event, payload) {
+  _handleClipboard(payload) {
     const text = String(payload ?? '');
     clipboard.writeText(text);
-    this._setStatus(event, { ready: true, message: `Character ${text} copied to clipboard.` });
+    this._setStatus({ ready: true, message: `Character ${text} copied to clipboard.` });
   }
 
-  _rebuildCache(event, { force } = {}) {
-    this._setStatus(event, { ready: false, message: 'Caching...' });
+  rebuildCache({ force = false } = {}) {
+    this._setStatus({ ready: false, message: 'Caching...' });
 
     if (force) {
       this.engine.clearCache();
@@ -83,7 +88,7 @@ class UCDWorker {
       this.engine.search(alias);
       count += 1;
       if (count >= nextReportAt) {
-        this._setStatus(event, { ready: false, message: `Cached ${count}/${totalCount} items.` });
+        this._setStatus({ ready: false, message: `Cached ${count}/${totalCount} items.` });
         nextReportAt += blockSize;
       }
     }
@@ -91,7 +96,7 @@ class UCDWorker {
     this.engine.dumpCache(this.cacheFile).catch((err) => {
       console.error(`Failed to write cache to ${this.cacheFile}:`, err);
     });
-    this._setStatus(event, { ready: true, message: 'Ready.' });
+    this._setStatus({ ready: true, message: 'Ready.' });
   }
 
   /** Synchronous shutdown hook — used during app quit. */

@@ -50,6 +50,7 @@ function createItem(ch, na) {
     if (isPinned(item.dataset.ch)) {
       pinned.removeChild(item);
       unpinned.prepend(item);
+      trimUnpinned();
     } else {
       unpinned.removeChild(item);
       pinned.append(item);
@@ -68,13 +69,18 @@ function appendPinned(ch, na) {
   elements().pinned.append(getOrCreateItem(ch, na));
 }
 
+function trimUnpinned() {
+  const { unpinned } = elements();
+  while (unpinned.children.length > MAX_UNPINNED) {
+    unpinned.removeChild(unpinned.lastChild);
+  }
+}
+
 function prependUnpinned(ch, na) {
   const { unpinned } = elements();
   const item = getOrCreateItem(ch, na);
-  while (unpinned.children.length >= MAX_UNPINNED) {
-    unpinned.removeChild(unpinned.lastChild);
-  }
   unpinned.prepend(item);
+  trimUnpinned();
 }
 
 function persist() {

@@ -5,10 +5,12 @@ const { BrowserWindow } = require('electron');
 
 const ROOT = path.join(__dirname, '..');
 
+const DEFAULT_ALWAYS_ON_TOP = true;
+
 const DEFAULT_WINDOW_OPTIONS = Object.freeze({
   width: 400,
   height: 600,
-  alwaysOnTop: true,
+  alwaysOnTop: DEFAULT_ALWAYS_ON_TOP,
   frame: true,
 });
 
@@ -29,4 +31,4 @@ function createMainWindow(overrides = {}) {
   return window;
 }
 
-module.exports = { createMainWindow };
+module.exports = { createMainWindow, DEFAULT_ALWAYS_ON_TOP };

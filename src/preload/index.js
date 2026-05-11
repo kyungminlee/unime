@@ -3,10 +3,10 @@
 const { contextBridge, ipcRenderer } = require('electron');
 
 // NOTE: Sandboxed preload scripts cannot require local modules, so the
-// channel list is duplicated here. Keep it in sync with
-// `src/shared/channels.js`.
-const SEND_CHANNELS = Object.freeze(['search', 'requestStatus', 'clipboard', 'cache']);
-const RECEIVE_CHANNELS = Object.freeze(['searchResult', 'status', 'cache', 'clearHistory']);
+// channel list is duplicated here. Parity with `src/shared/channels.js`
+// is enforced by `tests/channels.test.js`.
+const SEND_CHANNELS = Object.freeze(['search', 'requestStatus', 'clipboard']);
+const RECEIVE_CHANNELS = Object.freeze(['searchResult', 'status', 'clearHistory']);
 
 contextBridge.exposeInMainWorld('api', {
   send(channel, data) {
