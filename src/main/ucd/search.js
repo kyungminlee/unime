@@ -91,14 +91,6 @@ class UnicodeSearchEngine {
     this.cache.clear();
   }
 
-  /** Pre-populate the cache by running every alias query. */
-  *primeAliasCache() {
-    for (const alias of this.getAliasKeys()) {
-      this.search(alias);
-      yield alias;
-    }
-  }
-
   dumpCacheSync(filename) {
     this.cache.dumpToFileSync(filename);
   }

@@ -3,13 +3,11 @@ export const SEND = Object.freeze({
   SEARCH: 'search',
   REQUEST_STATUS: 'requestStatus',
   CLIPBOARD: 'clipboard',
-  CACHE: 'cache',
 });
 
 export const RECEIVE = Object.freeze({
   SEARCH_RESULT: 'searchResult',
   STATUS: 'status',
-  CACHE: 'cache',
   CLEAR_HISTORY: 'clearHistory',
 });
 

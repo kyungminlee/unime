@@ -20,9 +20,15 @@ function bindUi() {
   });
 
   window.addEventListener('keydown', (event) => {
-    query.focus();
     if (event.key === 'Escape') {
       query.value = '';
+      query.focus();
+      return;
+    }
+    // Refocus only on keys that produce text input, so modifiers, Tab,
+    // arrows, etc. don't steal focus back to the query field.
+    if (event.key.length === 1 && !event.ctrlKey && !event.metaKey && !event.altKey) {
+      query.focus();
     }
   });
 
@@ -41,10 +47,6 @@ function bindIpc() {
     results.render(result);
   });
 
-  receive(RECEIVE.CACHE, (data) => {
-    send(SEND.CACHE, data);
-  });
-
   receive(RECEIVE.CLEAR_HISTORY, ({ type }) => {
     history.clear(type);
   });
@@ -56,5 +58,4 @@ window.addEventListener('load', () => {
   bindIpc();
   elements().query.focus();
   send(SEND.REQUEST_STATUS, {});
-  send(SEND.CACHE, { force: false });
 });

@@ -1,16 +1,17 @@
 'use strict';
 
+// Channels are named from the renderer's perspective:
+//   SEND    — renderer → main
+//   RECEIVE — main → renderer
 const SEND = Object.freeze({
   SEARCH: 'search',
   REQUEST_STATUS: 'requestStatus',
   CLIPBOARD: 'clipboard',
-  CACHE: 'cache',
 });
 
 const RECEIVE = Object.freeze({
   SEARCH_RESULT: 'searchResult',
   STATUS: 'status',
-  CACHE: 'cache',
   CLEAR_HISTORY: 'clearHistory',
 });
 
