@@ -14,7 +14,13 @@ const DEFAULT_WINDOW_OPTIONS = Object.freeze({
   frame: true,
 });
 
-function createMainWindow(overrides = {}) {
+/**
+ * @param {{
+ *   shouldQuit?: () => boolean,
+ *   [key: string]: unknown,
+ * }} [options]
+ */
+function createMainWindow({ shouldQuit, ...overrides } = {}) {
   const window = new BrowserWindow({
     ...DEFAULT_WINDOW_OPTIONS,
     ...overrides,
@@ -26,6 +32,15 @@ function createMainWindow(overrides = {}) {
       preload: path.join(ROOT, 'preload', 'index.js'),
     },
   });
+
+  if (shouldQuit) {
+    window.on('close', (event) => {
+      if (!shouldQuit()) {
+        event.preventDefault();
+        window.hide();
+      }
+    });
+  }
 
   window.loadFile(path.join(ROOT, 'renderer', 'index.html'));
   return window;

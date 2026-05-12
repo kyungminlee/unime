@@ -5,6 +5,7 @@ const { app } = require('electron');
 
 const { createMainWindow } = require('./window.js');
 const { buildAppMenu } = require('./menu.js');
+const { createTray } = require('./tray.js');
 const { UCDWorker } = require('./ucd/worker.js');
 
 const DATA_DIR = path.join(__dirname, '..', 'data');
@@ -21,11 +22,21 @@ const state = {
   window: null,
   /** @type {UCDWorker | null} */
   worker: null,
+  /** @type {import('electron').Tray | null} */
+  tray: null,
+  isQuitting: false,
 };
 
+function showWindow() {
+  const window = state.window;
+  if (!window) { return; }
+  if (window.isMinimized()) { window.restore(); }
+  window.show();
+  window.focus();
+}
+
 function start() {
-  state.window = createMainWindow();
-  state.window.on('closed', () => { state.window = null; });
+  state.window = createMainWindow({ shouldQuit: () => state.isQuitting });
   state.worker = new UCDWorker({
     dataFile: paths.ucd,
     configFile: paths.config,
@@ -34,6 +45,13 @@ function start() {
     getWebContents: () => state.window?.webContents ?? null,
   });
   buildAppMenu({ getWindow: () => state.window, getWorker: () => state.worker });
+  state.tray = createTray({
+    getWindow: () => state.window,
+    requestQuit: () => {
+      state.isQuitting = true;
+      app.quit();
+    },
+  });
   state.window.webContents.once('did-finish-load', () => {
     state.worker?.rebuildCache({ force: false });
   });
@@ -43,18 +61,26 @@ function shutdown() {
   state.worker?.dumpCacheSync();
 }
 
-app.whenReady().then(start);
+if (!app.requestSingleInstanceLock()) {
+  app.quit();
+} else {
+  app.on('second-instance', showWindow);
+  app.whenReady().then(start);
+}
 
 app.on('activate', () => {
-  if (state.window === null) {
-    state.window = createMainWindow();
+  if (state.window) {
+    showWindow();
+  } else {
+    state.window = createMainWindow({ shouldQuit: () => state.isQuitting });
   }
 });
 
-app.on('before-quit', shutdown);
-
-app.on('window-all-closed', () => {
-  if (process.platform !== 'darwin') {
-    app.quit();
-  }
+app.on('before-quit', () => {
+  state.isQuitting = true;
+  shutdown();
 });
+
+// Tray keeps the app alive even when no window is visible, so do not
+// quit on window-all-closed. The user quits explicitly via the tray
+// menu or the application menu.
