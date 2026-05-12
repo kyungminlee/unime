@@ -16,11 +16,12 @@ function showAndFocus(window) {
  * @param {{
  *   getWindow: () => import('electron').BrowserWindow | null | undefined,
  *   requestQuit: () => void,
+ *   shortcut?: string | null,
  * }} options
  */
-function createTray({ getWindow, requestQuit }) {
+function createTray({ getWindow, requestQuit, shortcut }) {
   const tray = new Tray(nativeImage.createFromPath(TRAY_ICON_PATH));
-  tray.setToolTip('unime');
+  tray.setToolTip(shortcut ? `unime (${shortcut})` : 'unime');
 
   const toggle = () => {
     const window = getWindow();
@@ -33,7 +34,11 @@ function createTray({ getWindow, requestQuit }) {
   };
 
   const contextMenu = Menu.buildFromTemplate([
-    { label: 'Show unime', click: () => showAndFocus(getWindow()) },
+    {
+      label: 'Show unime',
+      accelerator: shortcut ?? undefined,
+      click: () => showAndFocus(getWindow()),
+    },
     { type: 'separator' },
     { label: 'Quit', click: () => requestQuit() },
   ]);

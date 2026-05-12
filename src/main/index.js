@@ -6,6 +6,8 @@ const { app } = require('electron');
 const { createMainWindow } = require('./window.js');
 const { buildAppMenu } = require('./menu.js');
 const { createTray } = require('./tray.js');
+const { registerGlobalShortcut, unregisterAll: unregisterShortcuts } = require('./shortcut.js');
+const { loadConfig } = require('./ucd/config.js');
 const { UCDWorker } = require('./ucd/worker.js');
 
 const DATA_DIR = path.join(__dirname, '..', 'data');
@@ -36,6 +38,7 @@ function showWindow() {
 }
 
 function start() {
+  const config = loadConfig(paths.config);
   state.window = createMainWindow({ shouldQuit: () => state.isQuitting });
   state.worker = new UCDWorker({
     dataFile: paths.ucd,
@@ -44,9 +47,17 @@ function start() {
     cacheFile: paths.userCache(),
     getWebContents: () => state.window?.webContents ?? null,
   });
-  buildAppMenu({ getWindow: () => state.window, getWorker: () => state.worker });
+  const activeShortcut = registerGlobalShortcut({
+    accelerator: config.shortcut,
+    getWindow: () => state.window,
+  });
+  buildAppMenu({
+    getWindow: () => state.window,
+    getWorker: () => state.worker,
+  });
   state.tray = createTray({
     getWindow: () => state.window,
+    shortcut: activeShortcut,
     requestQuit: () => {
       state.isQuitting = true;
       app.quit();
@@ -58,6 +69,7 @@ function start() {
 }
 
 function shutdown() {
+  unregisterShortcuts();
   state.worker?.dumpCacheSync();
 }
 

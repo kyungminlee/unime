@@ -41,3 +41,28 @@ test('loadConfig falls back when JSON is corrupt', () => {
     fs.unlinkSync(tmp);
   }
 });
+
+test('loadConfig returns default shortcut when unset', () => {
+  const config = loadConfig(path.join(__dirname, 'fixtures', 'config.sample.json'));
+  assert.equal(config.shortcut, DEFAULT_CONFIG.shortcut);
+});
+
+test('loadConfig accepts an explicit shortcut string', () => {
+  const tmp = path.join(os.tmpdir(), `unime-shortcut-${process.pid}.json`);
+  fs.writeFileSync(tmp, JSON.stringify({ shortcut: 'Alt+Space' }));
+  try {
+    assert.equal(loadConfig(tmp).shortcut, 'Alt+Space');
+  } finally {
+    fs.unlinkSync(tmp);
+  }
+});
+
+test('loadConfig accepts null shortcut to disable the global accelerator', () => {
+  const tmp = path.join(os.tmpdir(), `unime-shortcut-null-${process.pid}.json`);
+  fs.writeFileSync(tmp, JSON.stringify({ shortcut: null }));
+  try {
+    assert.equal(loadConfig(tmp).shortcut, null);
+  } finally {
+    fs.unlinkSync(tmp);
+  }
+});
