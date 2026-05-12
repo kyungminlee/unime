@@ -28,6 +28,10 @@ function fallback() {
  * @param {string} filename
  * @returns {UnimeConfig}
  */
+// NOTE: This file is bundled read-only inside the app today. If config
+// ever migrates to app.getPath('userData'), add allow-list validation
+// for `shortcut` so a tampered file cannot register an accelerator
+// that shadows OS shortcuts (e.g. CommandOrControl+Q, Alt+F4).
 function loadConfig(filename) {
   let parsed;
   try {
@@ -36,14 +40,12 @@ function loadConfig(filename) {
     console.error(`Failed to load config from ${filename}; using defaults.`, err);
     return fallback();
   }
-  let shortcut = DEFAULT_CONFIG.shortcut;
-  if (parsed.shortcut === null || typeof parsed.shortcut === 'string') {
-    shortcut = parsed.shortcut;
-  }
   return {
     maxHits: typeof parsed.maxHits === 'number' ? parsed.maxHits : DEFAULT_CONFIG.maxHits,
     aliases: parsed.aliases && typeof parsed.aliases === 'object' ? parsed.aliases : {},
-    shortcut,
+    shortcut: parsed.shortcut === null || typeof parsed.shortcut === 'string'
+      ? parsed.shortcut
+      : DEFAULT_CONFIG.shortcut,
   };
 }
 

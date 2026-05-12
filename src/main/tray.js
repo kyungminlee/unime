@@ -3,50 +3,41 @@
 const path = require('node:path');
 const { Tray, Menu, nativeImage } = require('electron');
 
+const { showAndFocus, toggleWindowVisibility } = require('./window.js');
+
 const TRAY_ICON_PATH = path.join(__dirname, '..', '..', 'assets', 'icons', '16x16.png');
 
-function showAndFocus(window) {
-  if (!window) { return; }
-  if (window.isMinimized()) { window.restore(); }
-  window.show();
-  window.focus();
-}
-
 /**
+ * Create the system tray icon. Returns null if the platform does not
+ * support a tray (e.g. Linux WMs without a status notifier), so the
+ * caller can fall back to quit-on-window-close behaviour.
+ *
  * @param {{
  *   getWindow: () => import('electron').BrowserWindow | null | undefined,
  *   requestQuit: () => void,
  *   shortcut?: string | null,
  * }} options
+ * @returns {import('electron').Tray | null}
  */
 function createTray({ getWindow, requestQuit, shortcut }) {
-  const tray = new Tray(nativeImage.createFromPath(TRAY_ICON_PATH));
+  const icon = nativeImage.createFromPath(TRAY_ICON_PATH);
+  let tray;
+  try {
+    tray = new Tray(icon);
+  } catch (err) {
+    console.warn('Failed to create system tray icon; continuing without tray.', err);
+    return null;
+  }
   tray.setToolTip(shortcut ? `unime (${shortcut})` : 'unime');
 
-  const toggle = () => {
-    const window = getWindow();
-    if (!window) { return; }
-    if (window.isVisible() && !window.isMinimized()) {
-      window.hide();
-    } else {
-      showAndFocus(window);
-    }
-  };
-
-  const contextMenu = Menu.buildFromTemplate([
-    {
-      label: 'Show unime',
-      accelerator: shortcut ?? undefined,
-      click: () => showAndFocus(getWindow()),
-    },
+  const showLabel = shortcut ? `Show unime  (${shortcut})` : 'Show unime';
+  tray.setContextMenu(Menu.buildFromTemplate([
+    { label: showLabel, click: () => showAndFocus(getWindow()) },
     { type: 'separator' },
     { label: 'Quit', click: () => requestQuit() },
-  ]);
-  tray.setContextMenu(contextMenu);
+  ]));
 
-  // Left-click toggles on Windows/Linux. macOS shows the menu on click, so
-  // also wire the click handler — users can still right-click for menu.
-  tray.on('click', toggle);
+  tray.on('click', () => toggleWindowVisibility(getWindow()));
 
   return tray;
 }
